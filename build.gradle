@@ -52,7 +52,7 @@ repositories {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-description = 'EPAM Report portal. Jira Integration'
+description = 'EPAM Report portal. Bugzilla Integration'
 
 dependencies {
     if (releaseMode) {
@@ -63,7 +63,6 @@ dependencies {
     compile 'eu.ralph-schuster:b4j:2.0.3'
     compile 'org.jasypt:jasypt:1.9.2'
 
-    compile('com.atlassian.jira:jira-rest-java-client-core:4.0.0')
     compile('com.atlassian.fugue:fugue:2.6.1')
 
     compile 'net.oauth.core:oauth:20090617'

@@ -1,14 +1,14 @@
 info:
   build:
-    name: Jira Service
-    description: ReportPortal Jira Integration
+    name: Bugzilla Service
+    description: ReportPortal Bugzilla Integration
     version: '@version@'
     branch: '@branch@'
     repo: '@repo@'
 
 spring:
   application:
-    name: jira
+    name: bugzilla
   profiles:
     active: ${rp.profiles:default}
 security:

@@ -3,7 +3,7 @@ server:
 
 eureka:
   instance:
-    hostname: ${HOSTNAME:jira}
+    hostname: ${HOSTNAME:bugzilla}
   client:
     serviceUrl:
       defaultZone: http://registry:8761/eureka/
@@ -20,5 +20,5 @@ spring:
     consul:
       host: registry
       discovery:
-        hostname: ${HOSTNAME:jira}
+        hostname: ${HOSTNAME:bugzilla}
         prefer-ip-address: false

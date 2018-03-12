@@ -23,7 +23,6 @@ package com.epam.reportportal.extension.bugtracking.bugzilla;
 
 import b4j.core.DefaultIssue;
 import b4j.core.Issue;
-import b4j.core.session.BugzillaHttpSession;
 import com.epam.reportportal.extension.bugtracking.ExternalSystemStrategy;
 import com.epam.ta.reportportal.config.CacheConfiguration;
 import com.epam.ta.reportportal.database.DataStorage;
@@ -33,17 +32,13 @@ import com.epam.ta.reportportal.ws.model.ErrorType;
 import com.epam.ta.reportportal.ws.model.externalsystem.PostFormField;
 import com.epam.ta.reportportal.ws.model.externalsystem.PostTicketRQ;
 import com.epam.ta.reportportal.ws.model.externalsystem.Ticket;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.XMLConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import rs.baselib.security.AuthorizationCallback;
 import rs.baselib.security.SimpleAuthorizationCallback;
-import sun.security.krb5.internal.AuthorizationData;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -57,13 +52,12 @@ import static com.epam.ta.reportportal.commons.validation.Suppliers.formattedSup
 import static com.epam.ta.reportportal.ws.model.ErrorType.UNABLE_INTERACT_WITH_EXTRERNAL_SYSTEM;
 
 /**
- * JIRA related implementation of {@link ExternalSystemStrategy}.
+ * Bugzilla related implementation of {@link ExternalSystemStrategy}.
  *
  * @author Andrei Varabyeu
  * @author Andrei_Ramanchuk
  */
 
-// TODO REVIEW this class after full JIRA support implementation
 public class BugzillaStrategy implements ExternalSystemStrategy {
 
     private static final String BUG = "Bug";
@@ -76,26 +70,18 @@ public class BugzillaStrategy implements ExternalSystemStrategy {
     private BZTicketDescriptionService descriptionService;
 
     @Override
-    public boolean checkConnection(ExternalSystem details) {
+    public boolean checkConnection(ExternalSystem details){
         validateExternalSystemDetails(details);
-
-        BugzillaHttpSession session;
-        try {
-            session = getBugzillaSession(details.getUrl(), details.getUsername(), details.getPassword());
-            boolean isOpen = session.open();
-            session.close();
-            return isOpen;
-        } catch (ConfigurationException e) {
-            e.printStackTrace();
-            return false;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        try (BugzillaSession session = getBugzillaSession(details.getUrl(),details.getUsername(),details.getPassword()))
+        {
+            return session.open();
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
             return false;
         }
     }
 
-
-    private Issue getIssue(String id, BugzillaHttpSession session){
+    private Issue getIssue(String id, BugzillaSession session){
         Issue issue = session.getIssue(id);
         return issue;
     }
@@ -103,11 +89,9 @@ public class BugzillaStrategy implements ExternalSystemStrategy {
     @Override
     @Cacheable(value = CacheConfiguration.EXTERNAL_SYSTEM_TICKET_CACHE, key = "#system.url + #system.project + #id")
     public Optional<Ticket> getTicket(String id, ExternalSystem details) {
-        try {
-                BugzillaHttpSession session =
-                        getBugzillaSession(details.getUrl(),details.getUsername(),details.getPassword());
+        try (BugzillaSession session = getBugzillaSession(details.getUrl(),details.getUsername(),details.getPassword()))
+        {
                 Optional<Ticket> ticket = getTicket(id, details, session);
-                session.close();
                 return ticket;
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -115,7 +99,7 @@ public class BugzillaStrategy implements ExternalSystemStrategy {
         }
     }
 
-    private Optional<Ticket> getTicket(String id, ExternalSystem details, BugzillaHttpSession session) {
+    private Optional<Ticket> getTicket(String id, ExternalSystem details, BugzillaSession session) {
         Issue issue = getIssue(id, session);
         if (issue!=null) {
             return Optional.of(BZTicketUtils.toTicket(issue, details));
@@ -147,8 +131,8 @@ public class BugzillaStrategy implements ExternalSystemStrategy {
                         issuetype.getValue()));
         final String issueTypeStr = issuetype.getValue().get(0);
 
-        try {
-//        try (JiraRestClient client = getClient(details.getUrl(), ticketRQ.getUsername(), ticketRQ.getPassword())) {
+        try (BugzillaSession session = getBugzillaSession(details.getUrl(),details.getUsername(),details.getPassword()))
+        {
 //            Project jiraProject = getProject(client, details);
 //
 //            if (null != components.getValue()) {
@@ -192,7 +176,7 @@ public class BugzillaStrategy implements ExternalSystemStrategy {
 //            if (counter != 0)
 //                client.getIssueClient()
 //                        .addAttachments(issue.getAttachmentsUri(), Arrays.copyOf(attachmentInputs, counter));
-            BugzillaHttpSession session = getBugzillaSession(details.getUrl(), details.getUsername(), details.getPassword());
+            BugzillaSession session = getBugzillaSession(details.getUrl(), details.getUsername(), details.getPassword());
             Ticket ticket = getTicket("123", details,session).orElse(null);
             session.close();
             return ticket;
@@ -205,22 +189,6 @@ public class BugzillaStrategy implements ExternalSystemStrategy {
         }
     }
 
-//    /**
-//     * Get jira's {@link Project} object.
-//     *
-//     * @param jiraRestClient Jira API client
-//     * @param details        System details
-//     * @return Jira Project
-//     */
-//    // paced in separate method because result object should be cached
-//    // TODO consider avoiding this method
-//    @Cacheable(value = CacheConfiguration.JIRA_PROJECT_CACHE, key = "#details")
-//    private Project getProject(JiraRestClient jiraRestClient, ExternalSystem details) {
-//        return jiraRestClient.getProjectClient().getProject(details.getProject()).claim();
-//    }
-
-//    private SearchResult findIssue(String i
-//
 //    /**
 //     * Parse ticket description and find binary data
 //     *
@@ -389,12 +357,16 @@ public class BugzillaStrategy implements ExternalSystemStrategy {
 //
 //    }
 
-    public BugzillaHttpSession getBugzillaSession(String uri, String username, String password) throws MalformedURLException {
-        BugzillaHttpSession session = new BugzillaHttpSession();
-        session.setBaseUrl(new URL(uri));
+    public BugzillaSession getBugzillaSession(String uri, String username, String password) {
+        BugzillaSession session = new BugzillaSession();
+        try {
+            session.setBaseUrl(new URL(uri));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
         session.setBugzillaBugClass(DefaultIssue.class);
 
-        AuthorizationCallback authorizationCallback = new SimpleAuthorizationCallback(username,password);
+        AuthorizationCallback authorizationCallback = new SimpleAuthorizationCallback( username, password );
         session.getHttpSessionParams().setAuthorizationCallback(authorizationCallback);
 
         return session;

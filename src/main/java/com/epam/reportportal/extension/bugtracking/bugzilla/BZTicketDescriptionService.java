@@ -21,24 +21,15 @@
 
 package com.epam.reportportal.extension.bugtracking.bugzilla;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.List;
-
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.mime.MimeType;
-import org.apache.tika.mime.MimeTypeException;
-import org.apache.tika.mime.MimeTypes;
+import com.epam.ta.reportportal.database.dao.LogRepository;
+import com.epam.ta.reportportal.database.dao.TestItemRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.epam.ta.reportportal.database.dao.LogRepository;
-import com.epam.ta.reportportal.database.dao.TestItemRepository;
-import com.epam.ta.reportportal.database.entity.Log;
-import com.epam.ta.reportportal.database.entity.item.TestItem;
-import com.epam.ta.reportportal.ws.model.externalsystem.PostTicketRQ;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * Provide functionality for building jira's ticket description
@@ -66,85 +57,81 @@ public class BZTicketDescriptionService {
 
 	private final DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
-	/**
-	 * Generate ticket description using logs of specified test item.
-	 * 
-	 * @param itemIds
-	 * @param ticketRQ
-	 * @return
-	 */
-	public String getDescription(Iterable<String> itemIds, PostTicketRQ ticketRQ) {
-		if (null == itemIds) {
-			return "";
-		}
-		TikaConfig tikaConfig = TikaConfig.getDefaultConfig();
-		MimeTypes mimeRepository = tikaConfig.getMimeRepository();
-		StringBuilder descriptionBuilder = new StringBuilder();
-		for (String itemId : itemIds) {
-			List<Log> logs = logRepository.findByTestItemRef(itemId, ticketRQ.getNumberOfLogs(), ticketRQ.getIsIncludeScreenshots());
-			if (null != ticketRQ.getBackLinks().get(itemId) && !ticketRQ.getBackLinks().get(itemId).isEmpty()) {
-				descriptionBuilder.append(BACK_LINK_HEADER);
-				descriptionBuilder.append("\n");
-				descriptionBuilder.append(" - ");
-				descriptionBuilder.append(String.format(BACK_LINK_PATTERN, ticketRQ.getBackLinks().get(itemId)));
-				descriptionBuilder.append("\n");
-			}
-			// For single test-item only
-			// TODO add multiple test-items backlinks
-			if (ticketRQ.getIsIncludeComments() && (ticketRQ.getBackLinks().size() == 1)) {
-				if (null != ticketRQ.getBackLinks().get(itemId) && !ticketRQ.getBackLinks().get(itemId).isEmpty()) {
-					TestItem item = itemRepository.findOne(ticketRQ.getTestItemId());
-					// If test-item contains any comments, then add it for JIRA
-					// comments section
-					if ((null != item.getIssue().getIssueDescription()) && (!item.getIssue().getIssueDescription().isEmpty())) {
-						descriptionBuilder.append(COMMENTS_HEADER);
-						descriptionBuilder.append("\n");
-						descriptionBuilder.append(item.getIssue().getIssueDescription());
-						descriptionBuilder.append("\n");
-					}
-				}
-			}
-			if (!logs.isEmpty() && (ticketRQ.getIsIncludeLogs() || ticketRQ.getIsIncludeScreenshots())) {
-				descriptionBuilder.append("h3.*Test execution log:*\n");
-				descriptionBuilder
-						.append("{panel:title=Test execution log|borderStyle=solid|borderColor=#ccc|titleColor=#34302D|titleBGColor=#6DB33F}");
-				for (Log log : logs) {
-					if (ticketRQ.getIsIncludeLogs()) {
-						descriptionBuilder.append(CODE).append(getFormattedMessage(log)).append(CODE);
-					}
-					if (log.getBinaryContent() != null && ticketRQ.getIsIncludeScreenshots()) {
-						try {
-							MimeType mimeType = mimeRepository.forName(log.getBinaryContent().getContentType());
-							if (log.getBinaryContent().getContentType().contains(IMAGE_CONTENT)) {
-								descriptionBuilder.append("!").append(log.getBinaryContent().getBinaryDataId())
-										.append(mimeType.getExtension()).append(IMAGE_HEIGHT_TEMPLATE);
-							} else {
-								descriptionBuilder.append("[^").append(log.getBinaryContent().getBinaryDataId())
-										.append(mimeType.getExtension()).append("]");
-							}
-							descriptionBuilder.append(JIRA_MARKUP_LINE_BREAK);
-						} catch (MimeTypeException e) {
-							descriptionBuilder.append(JIRA_MARKUP_LINE_BREAK);
-							LOGGER.error("BZTicketDescriptionService error: " + e.getMessage(), e);
-						}
+//	/**
+//	 * Generate ticket description using logs of specified test item.
+//	 */
+//	public String getDescription(Iterable<String> itemIds, PostTicketRQ ticketRQ) {
+//		if (null == itemIds) {
+//			return "";
+//		}
+//		TikaConfig tikaConfig = TikaConfig.getDefaultConfig();
+//		MimeTypes mimeRepository = tikaConfig.getMimeRepository();
+//		StringBuilder descriptionBuilder = new StringBuilder();
+//		for (String itemId : itemIds) {
+//			List<Log> logs = logRepository.findByTestItemRef(itemId, ticketRQ.getNumberOfLogs(), ticketRQ.getIsIncludeScreenshots());
+//			if (null != ticketRQ.getBackLinks().get(itemId) && !ticketRQ.getBackLinks().get(itemId).isEmpty()) {
+//				descriptionBuilder.append(BACK_LINK_HEADER);
+//				descriptionBuilder.append("\n");
+//				descriptionBuilder.append(" - ");
+//				descriptionBuilder.append(String.format(BACK_LINK_PATTERN, ticketRQ.getBackLinks().get(itemId)));
+//				descriptionBuilder.append("\n");
+//			}
+//			// For single test-item only
+//			// TODO add multiple test-items backlinks
+//			if (ticketRQ.getIsIncludeComments() && (ticketRQ.getBackLinks().size() == 1)) {
+//				if (null != ticketRQ.getBackLinks().get(itemId) && !ticketRQ.getBackLinks().get(itemId).isEmpty()) {
+//					TestItem item = itemRepository.findOne(ticketRQ.getTestItemId());
+//					// If test-item contains any comments, then add it for JIRA
+//					// comments section
+//					if ((null != item.getIssue().getIssueDescription()) && (!item.getIssue().getIssueDescription().isEmpty())) {
+//						descriptionBuilder.append(COMMENTS_HEADER);
+//						descriptionBuilder.append("\n");
+//						descriptionBuilder.append(item.getIssue().getIssueDescription());
+//						descriptionBuilder.append("\n");
+//					}
+//				}
+//			}
+//			if (!logs.isEmpty() && (ticketRQ.getIsIncludeLogs() || ticketRQ.getIsIncludeScreenshots())) {
+//				descriptionBuilder.append("h3.*Test execution log:*\n");
+//				descriptionBuilder
+//						.append("{panel:title=Test execution log|borderStyle=solid|borderColor=#ccc|titleColor=#34302D|titleBGColor=#6DB33F}");
+//				for (Log log : logs) {
+//					if (ticketRQ.getIsIncludeLogs()) {
+//						descriptionBuilder.append(CODE).append(getFormattedMessage(log)).append(CODE);
+//					}
+//					if (log.getBinaryContent() != null && ticketRQ.getIsIncludeScreenshots()) {
+//						try {
+//							MimeType mimeType = mimeRepository.forName(log.getBinaryContent().getContentType());
+//							if (log.getBinaryContent().getContentType().contains(IMAGE_CONTENT)) {
+//								descriptionBuilder.append("!").append(log.getBinaryContent().getBinaryDataId())
+//										.append(mimeType.getExtension()).append(IMAGE_HEIGHT_TEMPLATE);
+//							} else {
+//								descriptionBuilder.append("[^").append(log.getBinaryContent().getBinaryDataId())
+//										.append(mimeType.getExtension()).append("]");
+//							}
+//							descriptionBuilder.append(JIRA_MARKUP_LINE_BREAK);
+//						} catch (MimeTypeException e) {
+//							descriptionBuilder.append(JIRA_MARKUP_LINE_BREAK);
+//							LOGGER.error("BZTicketDescriptionService error: " + e.getMessage(), e);
+//						}
+//
+//					}
+//				}
+//				descriptionBuilder.append("{panel}\n");
+//			}
+//		}
+//		return descriptionBuilder.toString();
+//	}
 
-					}
-				}
-				descriptionBuilder.append("{panel}\n");
-			}
-		}
-		return descriptionBuilder.toString();
-	}
-
-	private String getFormattedMessage(Log log) {
-		StringBuilder messageBuilder = new StringBuilder();
-		if (log.getLogTime() != null) {
-			messageBuilder.append(" Time: ").append(dateFormat.format(log.getLogTime())).append(", ");
-		}
-		if (log.getLevel() != null) {
-			messageBuilder.append("Level: ").append(log.getLevel()).append(", ");
-		}
-		messageBuilder.append("Log: ").append(log.getLogMsg()).append("\n");
-		return messageBuilder.toString();
-	}
+//	private String getFormattedMessage(Log log) {
+//		StringBuilder messageBuilder = new StringBuilder();
+//		if (log.getLogTime() != null) {
+//			messageBuilder.append(" Time: ").append(dateFormat.format(log.getLogTime())).append(", ");
+//		}
+//		if (log.getLevel() != null) {
+//			messageBuilder.append("Level: ").append(log.getLevel()).append(", ");
+//		}
+//		messageBuilder.append("Log: ").append(log.getLogMsg()).append("\n");
+//		return messageBuilder.toString();
+//	}
 }
