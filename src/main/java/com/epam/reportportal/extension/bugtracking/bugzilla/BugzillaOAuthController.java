@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Report Portal.  If not, see <http://www.gnu.org/licenses/>.
  */ 
-package com.epam.reportportal.extension.bugtracking.jira;
+package com.epam.reportportal.extension.bugtracking.bugzilla;
 
 import com.epam.ta.reportportal.database.dao.ProjectRepository;
 import com.epam.ta.reportportal.database.entity.AuthType;
@@ -47,7 +47,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 /**
  * Created by andrei_varabyeu on 6/14/16.
  */
-public class JiraOAuthController {
+public class BugzillaOAuthController {
 
 //	@Autowired
 //	private OAuthClientService oauthJiraService;

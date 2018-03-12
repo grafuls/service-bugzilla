@@ -7,7 +7,7 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE")
         classpath 'com.bmuschko:gradle-docker-plugin:3.0.12'
-
+        classpath 'eu.ralph-schuster:b4j:2.0.3'
     }
 }
 
@@ -60,7 +60,7 @@ dependencies {
     } else {
         compile('com.github.reportportal:commons-bugtracking:4.0.3')
     }
-
+    compile 'eu.ralph-schuster:b4j:2.0.3'
     compile 'org.jasypt:jasypt:1.9.2'
 
     compile('com.atlassian.jira:jira-rest-java-client-core:4.0.0')
@@ -87,5 +87,5 @@ test {
 build.dependsOn jacocoTestReport
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.1'
+    gradleVersion = '4.3'
 }

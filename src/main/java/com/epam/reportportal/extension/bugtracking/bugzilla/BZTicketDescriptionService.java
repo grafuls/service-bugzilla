@@ -19,7 +19,7 @@
  * along with Report Portal.  If not, see <http://www.gnu.org/licenses/>.
  */ 
 
-package com.epam.reportportal.extension.bugtracking.jira;
+package com.epam.reportportal.extension.bugtracking.bugzilla;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -47,8 +47,8 @@ import com.epam.ta.reportportal.ws.model.externalsystem.PostTicketRQ;
  * @author Dzmitry_Kavalets
  */
 @Service
-public class JIRATicketDescriptionService {
-	private static final Logger LOGGER = LoggerFactory.getLogger(JIRATicketDescriptionService.class);
+public class BZTicketDescriptionService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(BZTicketDescriptionService.class);
 
 	public static final String JIRA_MARKUP_LINE_BREAK = "\\\\ ";
 	public static final String BACK_LINK_HEADER = "h3.*Back link to Report Portal:*";
@@ -125,7 +125,7 @@ public class JIRATicketDescriptionService {
 							descriptionBuilder.append(JIRA_MARKUP_LINE_BREAK);
 						} catch (MimeTypeException e) {
 							descriptionBuilder.append(JIRA_MARKUP_LINE_BREAK);
-							LOGGER.error("JIRATicketDescriptionService error: " + e.getMessage(), e);
+							LOGGER.error("BZTicketDescriptionService error: " + e.getMessage(), e);
 						}
 
 					}

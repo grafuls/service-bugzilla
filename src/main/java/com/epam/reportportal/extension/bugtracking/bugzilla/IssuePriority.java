@@ -18,29 +18,45 @@
  * You should have received a copy of the GNU General Public License
  * along with Report Portal.  If not, see <http://www.gnu.org/licenses/>.
  */ 
-
-package com.epam.reportportal.extension.bugtracking.jira;
-
-import com.atlassian.jira.rest.client.api.domain.BasicComponent;
-
-import java.util.function.Function;
+ 
+package com.epam.reportportal.extension.bugtracking.bugzilla;
 
 /**
- * Set of useful {@link java.util.function.Predicate}s and {@link Function}s for JIRA-related stuff
- *
+ * IssueSeverity enumerator<br>
+ * Describe default severities from JIRA (a while)
+ * 
  * @author Andrei_Ramanchuk
  */
-final class JiraPredicates {
+public enum IssuePriority {
 
-	private JiraPredicates() {
+	//@formatter:off
+	BLOCKER(1),
+	CRITICAL(2),
+	MAJOR(3), 
+	MINOR(4), 
+	TRIVIAL(5);
+	//@formatter:on
 
+	private long priority;
+
+	public long getValue() {
+		return priority;
 	}
 
-	/**
-	 * {@link BasicComponent} to project name converter
-	 *
-	 * @return converter
-	 */
-	static final Function<BasicComponent, String> COMPONENT_NAMES = BasicComponent::getName;
+	IssuePriority(long value) {
+		this.priority = value;
+	}
 
+	public static IssuePriority findByName(String name) {
+		for (IssuePriority type : IssuePriority.values()) {
+			if (type.name().equalsIgnoreCase(name)) {
+				return type;
+			}
+		}
+		return null;
+	}
+
+	public static boolean isPresent(String name) {
+		return null != findByName(name);
+	}
 }

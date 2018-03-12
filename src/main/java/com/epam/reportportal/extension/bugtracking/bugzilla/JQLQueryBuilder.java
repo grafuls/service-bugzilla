@@ -19,7 +19,7 @@
  * along with Report Portal.  If not, see <http://www.gnu.org/licenses/>.
  */ 
  
-package com.epam.reportportal.extension.bugtracking.jira;
+package com.epam.reportportal.extension.bugtracking.bugzilla;
 
 /**
  * Jira query builder. Provide functionality for building queries.<br>

@@ -18,19 +18,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Report Portal.  If not, see <http://www.gnu.org/licenses/>.
  */ 
-package com.epam.reportportal.extension.bugtracking.jira.oauth;
 
-import com.google.common.annotations.Beta;
-import com.google.common.base.MoreObjects;
+package com.epam.reportportal.extension.bugtracking.bugzilla;
 
-@Beta
-public class TokenSecretVerifierHolder {
-	public String token;
-	public String verifier;
-	public String secret;
+import com.atlassian.jira.rest.client.api.domain.BasicComponent;
 
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this).add("token", token).add("verifier", verifier).add("secret", secret).toString();
+import java.util.function.Function;
+
+/**
+ * Set of useful {@link java.util.function.Predicate}s and {@link Function}s for JIRA-related stuff
+ *
+ * @author Andrei_Ramanchuk
+ */
+final class BugzillaPredicates {
+
+	private BugzillaPredicates() {
+
 	}
+
+	/**
+	 * {@link BasicComponent} to project name converter
+	 *
+	 * @return converter
+	 */
+	static final Function<BasicComponent, String> COMPONENT_NAMES = BasicComponent::getName;
+
 }

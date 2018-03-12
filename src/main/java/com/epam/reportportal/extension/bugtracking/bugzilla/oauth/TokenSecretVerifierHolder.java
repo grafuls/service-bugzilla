@@ -18,45 +18,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Report Portal.  If not, see <http://www.gnu.org/licenses/>.
  */ 
- 
-package com.epam.reportportal.extension.bugtracking.jira;
+package com.epam.reportportal.extension.bugtracking.bugzilla.oauth;
 
-/**
- * IssueSeverity enumerator<br>
- * Describe default severities from JIRA (a while)
- * 
- * @author Andrei_Ramanchuk
- */
-public enum IssuePriority {
+import com.google.common.annotations.Beta;
+import com.google.common.base.MoreObjects;
 
-	//@formatter:off
-	BLOCKER(1),
-	CRITICAL(2),
-	MAJOR(3), 
-	MINOR(4), 
-	TRIVIAL(5);
-	//@formatter:on
+@Beta
+public class TokenSecretVerifierHolder {
+	public String token;
+	public String verifier;
+	public String secret;
 
-	private long priority;
-
-	public long getValue() {
-		return priority;
-	}
-
-	IssuePriority(long value) {
-		this.priority = value;
-	}
-
-	public static IssuePriority findByName(String name) {
-		for (IssuePriority type : IssuePriority.values()) {
-			if (type.name().equalsIgnoreCase(name)) {
-				return type;
-			}
-		}
-		return null;
-	}
-
-	public static boolean isPresent(String name) {
-		return null != findByName(name);
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this).add("token", token).add("verifier", verifier).add("secret", secret).toString();
 	}
 }

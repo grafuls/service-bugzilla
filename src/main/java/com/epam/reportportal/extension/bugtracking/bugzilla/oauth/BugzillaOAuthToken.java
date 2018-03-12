@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Report Portal.  If not, see <http://www.gnu.org/licenses/>.
  */ 
-package com.epam.reportportal.extension.bugtracking.jira.oauth;
+package com.epam.reportportal.extension.bugtracking.bugzilla.oauth;
 
 import com.google.common.annotations.Beta;
 import com.google.common.base.MoreObjects;
@@ -31,7 +31,7 @@ import java.time.LocalDate;
  * @author Andrei Varabyeu
  */
 @Beta
-public class JiraOAuthToken {
+public class BugzillaOAuthToken {
 
 	//@Id
 	private String id;

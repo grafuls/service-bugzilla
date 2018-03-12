@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Report Portal.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.epam.reportportal.extension.bugtracking.jira;
+package com.epam.reportportal.extension.bugtracking.bugzilla;
 
 import com.epam.reportportal.extension.bugtracking.BugTrackingApp;
 import com.epam.reportportal.extension.bugtracking.ExternalSystemStrategy;
@@ -31,24 +31,17 @@ import org.springframework.context.annotation.Bean;
  *
  * @author Andrei Varabyeu
  */
-public class JiraServiceApp extends BugTrackingApp {
+public class BugzillaServiceApp extends BugTrackingApp {
 
     private static final String DEFAULT_PASS = "reportportal";
 
     @Override
     public ExternalSystemStrategy externalSystemStrategy() {
-        return new JiraStrategy();
-    }
-
-    @Bean
-    public BasicTextEncryptor basicTextEncryptor() {
-        BasicTextEncryptor basicTextEncryptor = new BasicTextEncryptor();
-        basicTextEncryptor.setPassword(DEFAULT_PASS);
-        return basicTextEncryptor;
+        return new BugzillaStrategy();
     }
 
     public static void main(String[] args) {
-        SpringApplication.run(JiraServiceApp.class, args);
+        SpringApplication.run(BugzillaServiceApp.class, args);
     }
 
 }
